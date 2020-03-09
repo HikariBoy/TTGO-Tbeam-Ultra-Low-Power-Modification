@@ -5,8 +5,11 @@
 <b>_PLEASE NOTE:  These modification are for experienced hackers only.  Please do not attempt these changes unless you truely understand what I am proposing, understand how to perform the changes and understand the risks.  As these are hardware changes, if you make a mistake you can permanently damage your board._</b> 
  
  
- <div style="float: left  color: blue font-style: italic">
-<img src="images/Fig0_TTGOlayout.png" alt="Figure 1. TTGO Tbeam showing the regions of the board with the proposed modification detailed below."  align="center" width="800"/></div>  <figcaption > <I><b>Figure 1: </b></I> TTGO Tbeam Image modifed from [original image]( https://github.com/LilyGO/TTGO-T-Beam/blob/master/images/image1.jpg ) showing the regions of the board with the proposed modification detailed below.
+
+<img src="images/Fig0_TTGOlayout.png" alt="Figure 1. TTGO Tbeam showing the regions of the board with the proposed modification detailed below."  align="center" width="800"/> <br> <figcaption >  <I><b>Figure 1: </b></I>  TTGO Tbeam Image modifed from [original image](https://github.com/LilyGO/TTGO-T-Beam/blob/master/images/image1.jpg) showing the regions of the board with the proposed modification detailed below.
+
+
+ </figcaption >  
 
  # Background
  The TTGO is an extremely versatile board, providing WiFi, bluetooth, LoRa radio, GPS modules and I/O under the control of an ESP32 processor.  The entire board is powered from a [18650 LiPo which nominally is rated at 2600 mA.hr](https://www.jaycar.com.au/18650-rechargeable-li-ion-battery-2600mah-3-7v/p/SB2308).  However during deep sleep the best that has been [reported is around 10 mA](https://github.com/JoepSchyns/Low_power_TTGO_T-beam), so that the maximum operational time is just over 10 days before some form of recharging is required.  With the changes outlined here to significantly reduce the power of this board, this operational time could be extended to over a year.<br>
@@ -17,9 +20,12 @@
 
 Deep sleep modes are detailed in the [espressif page](https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/system/sleep_modes.html) which describe how to shut down the ESP 32 into low power mode with all but the RTC operational.  The RTC needs to be active for the processor to wake on a timed interrupt.  The [ESP32 Electrical datasheet](esp32_datasheet_en_ELEC_SPECS.pdf) indicates the power consumption in the various modes as shown in the table below:
  
- <div style="float: left  color: blue font-style: italic">
-<img src="images/Table1PowerConsumptionModes.png" alt="Table 1. Extracted from the Espressif Systems ESP32 Datasheet V3.3 where it was originally designed "Table 6: Power Consumption by Power Modes" on page 21 of that document."  align="center" width="800"/></div>  <figcaption > <I><b>Table  1: </b></I>Power Consumption of the ESP32 processor.  This table was extracted from the Espressif Systems ESP32 Datasheet V3.3 where it was originally designed "Table 6: Power Consumption by Power Modes" on page 21 of that document.
  
+ <div style="float: left  color: blue font-style: italic"></div>
+<img src="images/Table1PowerConsumptionModes.png" alt="Table 1. Extracted from the Espressif Systems ESP32 Datasheet V3.3 where it was originally designed "Table 6: Power Consumption by Power Modes" on page 21 of that document."  align="center" width="800"/> <br>
+<I><b>Table  1: </b></I>Power Consumption of the ESP32 processor.  This table was extracted from the Espressif Systems ESP32 Datasheet V3.3 where it was originally designed "Table 6: Power Consumption by Power Modes" on page 21 of that document.<br>  
+
+
 ## Part #1: Low power during operation (GPS/USB/LoRa Off)
 
 The [ME6211](ME6211C33M5G_N_C82942.pdf) is a a High Speed LDO Regulator and the [TTGO schematic](t22_gps_v07.pdf) includes 2 of these
@@ -28,7 +34,9 @@ The [ME6211](ME6211C33M5G_N_C82942.pdf) is a a High Speed LDO Regulator and the 
 
 Both these ME6211 regulators contain an enable pin that is pulled high to keep the regulators on after power up.   During a regular boot sequence, the GPS is on and looks for satellites.  This typically draws 180&plusmn;10 mA and lock can take around 2 minutes.  After lock the current consumption is still around 100mA.  While the GPS can be shut down in software, it is difficult to lower the current consumption much less than 90 mA during regular operation.  
 In this <b>first approach to lowering the power consumption </b> the enable pin of IC U5 (the  ME6211 that generates  VCC_3.3V) is connected to GPIO21 to allow the power supplied to the GPS/LoRa/USB controller to be placed under software control.  This provides much greater flexibility when determining which devices should be powered up and when.
-<P></P>
+<br>  
+
+
 The physical layout of the TTGO Tbeam T22_V22 PCB is shown in Figure 2a with the 10k&Omega; resistor R27 identified next to the [ME6211](ME6211C33M5G_N_C82942.pdf) SMD. It is possible to undertake this modification without removing R27, however when the ME6211 enable pin is LOW, this causes an additional 0.5mA to flow which may not be significant during operation, but is a sizeable proportion of the total current in deep sleep mode. To remove this surface mount resistor I suggest using a small amount on regular lead-tin solder with a flux resin to allow even flow across the small component.  I performed this task with a regular electronics style 
 [soldering iron]( https://www.youtube.com/watch?v=8JM4oCpWnjU ), but it required a magnifying lens with a good light during the process.  After R27 is removed, a small piece of solid core [Kynar wire]( https://www.jaycar.com.au/red-wire-wrap-wire-on-spool/p/WW4344 ) (sometimes called wire-wrap wire) was used to connect from ME6211 Pin 3 to GPIO21 on the header connector.  Once used, GPIO21 should not be used for another other task.  The PCB after R27 removal and the addition of the wire (red) is shown in Figure 2b.  The corresponding circuit before and after the PCB modification is shown in Figure 2c and 2d, respectively.
 
