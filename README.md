@@ -157,21 +157,22 @@ I note that when the entire power to the board is turned off via switch <b>2JP1<
 
 
 
-Delay after start	|	Description	|	code	|	As New	|	As New, No GPS antenna		R27 removed	|	R46 removed	|	R27 & R46 removed	|	No GPS antenna, R27 & R46 removed	|
+
+Delay after start	|	Description	|	code	|	As New	|	As New, No GPS antenna	|	R27 removed, with GPS Antenna	|	R46 removed, with GPS Antenna	|	R27 & R46 removed, with GPS Antenna	|	No GPS antenna, R27 & R46 removed	|
 -------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|
 	|		|		|	unit (mA)	|	unit (mA)	|	unit (mA)	|	unit (mA)	|	unit (mA)	|	unit (mA)	|
-0	|	START	|	<code></code>	|	192	|	182		193.5	|	192	|	193	|	**181.5**	|
-10	|	GPS OFF	|	<code>ShutDownGPS() </code>	|	92.7	|	86.4		92.8	|	92.7	|	92.1	|	**84.9**	|
-20	|	WIFI OFF	|	<code>WiFi.mode(WIFI_OFF)</code>	|	92.7	|	86.4		92.8	|	92.7	|	92.1	|	84.9	|
-30	|	BLUETOOTH OFF	|	<code>btStop()</code>	|	92.7	|	86.5		92.8	|	92.7	|	92.1	|	84.9	|
-40	|	LORA OFF	|	<code>LoRa.sleep()</code>	|	89.4	|	83.2		89.5	|	89.4	|	88.9	|	81.7	|
-50	|	ME6211/EN off	|	<code>digitalWrite(ME6211_EN, LOW)</code>	|	78.1	|	71.8		73.5	|	78.1	|	73.1	|	76.3	|
-60	|	ME6211/EN on	|	<code>digitalWrite(ME6211_EN, HIGH)</code>	|	89.2	|	82.9		89.2	|	89.1	|	88.6	|	81.4	|
-70	|	LED ON	|	<code>digitalWrite(BUILTIN_LED, HIGH)</code>	|	90.3	|	84.1		90.4	|	90.3	|	89.7	|	82.6	|
-80	|	LED OFF	|	<code>digitalWrite(BUILTIN_LED, LOW)</code>	|	89.2	|	82.9		89.3	|	89.1	|	88.6	|	82.6	|
-90	|	config ESP sleep interrupt	|	<code>esp_sleep_enable_timer_wakeup()</code>	|	89.2	|	82.9		89.3	|	89.2	|	88.6	|	81.5	|
-100	|	config RTC	|	<code>esp_deep_sleep_pd_config(()</code>	|	89.2	|	82.9		89.3	|	89.1	|	88.6	|	81.4	|
-110	|	enter DEEP sleep	|	<code>esp_deep_sleep_start()</code>	|	**19.25**	|	**12.88**		**2.25**	|	**17.2**	|	**0.17**	|	**0.175**	|
+0	|	START	|	<code></code>	|	192	|	182	|	193.5	|	192	|	193	|	**181.5**	|
+10	|	GPS OFF	|	<code>ShutDownGPS() </code>	|	92.7	|	86.4	|	92.8	|	92.7	|	92.1	|	**84.9**	|
+20	|	WIFI OFF	|	<code>WiFi.mode(WIFI_OFF)</code>	|	92.7	|	86.4	|	92.8	|	92.7	|	92.1	|	84.9	|
+30	|	BLUETOOTH OFF	|	<code>btStop()</code>	|	92.7	|	86.5	|	92.8	|	92.7	|	92.1	|	84.9	|
+40	|	LORA OFF	|	<code>LoRa.sleep()</code>	|	89.4	|	83.2	|	89.5	|	89.4	|	88.9	|	81.7	|
+50	|	ME6211/EN off	|	<code>digitalWrite(ME6211_EN, LOW)</code>	|	78.1	|	71.8	|	73.5	|	78.1	|	73.1	|	76.3	|
+60	|	ME6211/EN on	|	<code>digitalWrite(ME6211_EN, HIGH)</code>	|	89.2	|	82.9	|	89.2	|	89.1	|	88.6	|	81.4	|
+70	|	LED ON	|	<code>digitalWrite(BUILTIN_LED, HIGH)</code>	|	90.3	|	84.1	|	90.4	|	90.3	|	89.7	|	82.6	|
+80	|	LED OFF	|	<code>digitalWrite(BUILTIN_LED, LOW)</code>	|	89.2	|	82.9	|	89.3	|	89.1	|	88.6	|	82.6	|
+90	|	config ESP sleep interrupt	|	<code>esp_sleep_enable_timer_wakeup()</code>	|	89.2	|	82.9	|	89.3	|	89.2	|	88.6	|	81.5	|
+100	|	config RTC	|	<code>esp_deep_sleep_pd_config(()</code>	|	89.2	|	82.9	|	89.3	|	89.1	|	88.6	|	81.4	|
+110	|	enter DEEP sleep	|	<code>esp_deep_sleep_start()</code>	|	**19.25**	|	**12.88**	|	**2.25**	|	**17.2**	|	**0.17**	|	**0.175**	|
 
 
 
