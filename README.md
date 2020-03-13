@@ -178,7 +178,7 @@ Delay after start	|	Description	|	code	|	GPS antenna plugged in, VDD_SDIO to 3.3
 
 Delay after start	|	Description	|	code	|	As New	|	R27 removed	|	R46 removed	|	R27 & R46 removed	|	No GPS antenna, R27 & R46 removed	|  
 -------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|  
-	|		|		|	unit (mA)	|	unit (mA)	|	unit (mA)	|	unit (mA)	|	unit (mA)	|  
+--	|	-------------	|	-------------	|	unit (mA)	|	unit (mA)	|	unit (mA)	|	unit (mA)	|	unit (mA)	|  
 0	|	START	|	<code></code>	|	192	|	193.5	|	192	|	193	|	**181.5**	|  
 10	|	GPS OFF	|	<code>ShutDownGPS() </code>	|	92.7	|	92.8	|	92.7	|	92.1	|	**84.9**	|  
 20	|	WIFI OFF	|	<code>WiFi.mode(WIFI_OFF)</code>	|	92.7	|	92.8	|	92.7	|	92.1	|	84.9	|  
