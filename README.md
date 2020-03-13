@@ -48,21 +48,22 @@ In this <b>first approach to lowering the power consumption </b> the enable pin 
 
 The physical layout of the TTGO Tbeam T22_V22 PCB is shown in Figure 2a with the 10 k&Omega; resistor R27 identified next to the [ME6211](ME6211C33M5G_N_C82942.pdf) SMD. Without adding additional drivers (FETs or other) it is essential to remove the R27 (10 k&Omega;) resistor as we need to control the [ME6211](ME6211C33M5G_N_C82942.pdf) by driving it's enable pin (pin 3) low using  <code>digitalWrite(21, LOW) </code> _while the ESP32 is in deep sleep_.  However the ESP32 cannot continue to sink current while in deep sleep, so the R27 will force the [ME6211](ME6211C33M5G_N_C82942.pdf) enable (pin 3) back into a high state, turning back on the GPS/LoRA/USB-Controller significantly the power consumption. To remove this surface mount resistor I suggest using a small amount on regular lead-tin solder with a flux resin to allow even flow across the small component.  I performed this task with a regular electronics style 
 [soldering iron]( https://www.youtube.com/watch?v=8JM4oCpWnjU ), but it required a magnifying lens with a good light during the process.  After R27 is removed, a small piece of solid core [Kynar wire]( https://www.jaycar.com.au/red-wire-wrap-wire-on-spool/p/WW4344 ) (sometimes called wire-wrap wire) was used to connect from ME6211 Pin 3 to GPIO21 on the header connector.  Once used, GPIO21 should not be used for another other task.  The PCB after R27 removal and the addition of the wire (red) is shown in Figure 2b.  The corresponding circuit before and after the PCB modification is shown in Figure 2c and 2d, respectively.  Note that in Figure 2b I have also disconnected the GPS antenna as it was found that this add at additional ~6 mA.  If not using the antenna, best to just disconnect to ensure maximum battery life.
-_BUT WAIT_ : Having removed R27 the the GPS/LoRA/USB-Controller is entirely under software control.  <b>What happens when we go to upload updated fireware to the TTGO via USB connected PC ? </b>  With the CP2104 USB-Controller off, the USB connected PC never sees the TTGO board and it can never be reprogrammed (effectively bricked).  The solution is to reconnect a resistor (value anywhere from 10-100 k&Omega;) from [ME6211](ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) to [TP5400]( Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5), the latter pin is connected to the USB 5V supply (VBUS) via a 0.3 &Omega; (R54). This physical change is shown in Figure 2e, where a 28 k&Omega; resistor was used.  In doing so the [ME6211](ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) is now HIGH whenever the USB cable is conencted, overriding the software defined state and the USB port is valid when programming the TTGO. Figure 2d shows the jumper used to connect to the [ME6211](ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) (actually connected now to GPIO21).   
+_BUT WAIT_ : Having removed R27 the the GPS/LoRA/USB-Controller is entirely under software control.  <b>What happens when we go to upload updated fireware to the TTGO via USB connected PC ? </b>  With the CP2104 USB-Controller off, the USB connected PC never sees the TTGO board and it can never be reprogrammed (effectively bricked).  The solution is to reconnect a resistor (value anywhere from 10-100 k&Omega;) from [ME6211](ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) to [TP5400]( Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5), the latter pin is connected to the USB 5V supply (VBUS) via a 0.3 &Omega; (R54). This physical change is shown in Figure 2e, where a 28 k&Omega; resistor was used.  In doing so the [ME6211](ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) is now HIGH whenever the USB cable is connected, overriding the software defined state and the USB port is valid when programming the TTGO. Figure 2d shows the jumper used to connect to the [ME6211](ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) (actually connected now to GPIO21).   
 
 <div style="float: left  color: blue font-style: italic">
 <img src="images/Fig1_R27.png" alt="Figure 2. Physical layout of the TTGO Tbeam T22_V22 PCB showing (a) before and (b) after modification of the circuit to remove resistors R27 and add a jumper from Pin 3 of ME6211 (EN) to IO21.  This circuit schematic (c) before and (d) after modification is also shown."  align="center" width="1000"/></div>  <figcaption > <I><b>Figure 2: </b></I>Physical layout of the TTGO Tbeam T22_V22 PCB showing (a) before and (b) after modification of the circuit to remove resistors R27 and add a jumper from Pin 3 of ME6211 (EN) to IO21.  This circuit schematic (c) before and (d) after modification is also shown, (e) addition of resistor from [TP5400]( Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5) to ME6211/EN (Pin 3) (which is also GPIO21), a change required to keep the USB Controller powered when uploading new firmware. 
 
 
-</figcaption >
+</figcaption ><br><br>
+
+
 With this change, by default the GPS/LoRa/USB are off unless the USB cable is plugged in.      If you want to use the GPS/LoRa/USB in normal operation, include the following in the <coe>setup()</code> routine<br>
 <code>
-    pinMode(21, OUTPUT);
+    pinMode(21, OUTPUT);<br>
     digitalWrite(21, HIGH);  // Enable power to GPS, LoRA and USB controller
 </code>
 
-It is recommended that you do not force <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown as this will "pulse" the USB controller on/off if the USB cable is connected, causing periodic disconnect.  This could cause programming issues.  The only reason to set <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown is if you have a micro-USB solar panel connected to the USB to help recharge the onboard battery. I have tested firmware upload with <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown and it works fine, but there is a possiblity that the controller could be pulsed off just before firmware upload which could cause issues.
-I possible, I suggest including a minimum deay of say 30 seconds in the setup routine after issuing <code> digitalWrite(21, HIGH) </code> to ensure the USB controller is on during upload if you are concenred.
+It is recommended that you do not force <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown as this will "pulse" the USB controller on/off if the USB cable is connected, causing periodic disconnect.  This could cause programming issues (although I have not had any).  The only reason to set <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown is if you have a micro-USB solar panel connected to the USB to help recharge the onboard battery. I have tested firmware upload with <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown and it works fine.  However if you are concerned, I suggest including a minimum deay of say 30 seconds in the setup routine after issuing <code> digitalWrite(21, HIGH) </code> to ensure the USB controller is on during upload.
 
 ### CURRENT DRAW MEASUREMENTS
 The results indicate:
@@ -96,7 +97,8 @@ Using the same approach as described in Figure 2, a [standard soldering iron wit
 
 
 
-</figcaption >
+</figcaption ><br><br>
+
 
 <b>_ISSUEs to NOTE_</b>:  When the above changes were made the following erorr would consistently appar during firware upload using the arduino IDE:
 >Configuring flash size...<br>
@@ -152,3 +154,23 @@ AFTER PCB MOD  |  OPERATION |56&plusmn;1mA |
 AFTER PCB MOD  | SLEEP  |   170&plusmn;20 &#181;A |
 
 I note that when the entire power to the board is turned off via switch <b>2JP1</b> in the [schematic](t22_gps_v07.pdf), the current drawn is only 70 &#181;A.  A voltage divider made from R42 and R43 loads the LiPo battery with 200K&Omega; accounting to 18.5 &#181;A of this current, so that around 51 &#181;A is consumed by the [TP5400, a 1A lithium battery and 5V / 1A boost control chip]( Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf) used to convert the [18650 LiPo battery](https://www.jaycar.com.au/18650-rechargeable-li-ion-battery-2600mah-3-7v/p/SB2308) from 3.7 V to 5 V.  From the datasheet, the <b> maximum input supply current</b> for this device is 100  &#181;A so the measured value of 51 &#181;A is reasonable. Assuming the same current is consumed when the main power switch <b>2JP1</b> is on, then given the measured total of 170  &#181;A when the ESP32 is in deep sleep mode, I can assume that 100  &#181;A is associated with the ESP32 and 70  &#181;A is associated with R42,R43 and the TP5400 power control chip.  Reviewing the power listed in Table #1 above from the Espressif Systems ESP32 Datasheet V3.3, this measured value of  100  &#181;A is expected from the ESP32 when in deep sleep but with the ULP enabled  (which it is as the processor is this work is arranged to wake on a timed interrupt with ULP and RTC).  Hence I believe there is not much more that can be squeezed out of the circuit to minimize the current.  Even if we shut down the ULP, the current consumption is dominated by the 70 &#181;A from R42,R43 and the TP5400, power control chip, so that no more than a x0.6 reduction in total current could be achieved.  Given I have dropped the current from the previous reported values of [10mA](https://github.com/JoepSchyns/Low_power_TTGO_T-beam) to 0.17 mA (a factor of 58) a reduction of x0.6 is hardly worth the effort for further circuit modifications.  If a software solution could be found to further lower the current, I would be interested to see the code.
+
+
+
+Delay after start	|	Description	|	code	|	GPS antenna plugged in, VDD_SDIO to 3.3V, R27 removed	|	GPS antenna plugged in, ME6211/EN with 10K to 5V, VDD_SDIO to 3.3V	|	GPS antenna plugged in, ME6211/EN with 10K to 5V, R46 removed	|	GPS antenna plugged in,  R27 & R46 removed	|	GPS antenna removed R27 & R46 removed	|
+	-------------	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|
+0	|	START	|	<code></code>	|	193.5	|	192	|	192	|	193	|	*181.5*	|
+10	|	GPS_OFF	|	<code>ShutDownGPS() </code>	|	92.8	|	92.7	|	92.7	|	92.1	|	*84.9*	|
+20	|	WIFI_OFF	|	<code></code>	|	92.8	|	92.7	|	92.7	|	92.1	|	84.9	|
+30	|	BLUETOOTH_OFF	|	<code></code>	|	92.8	|	92.7	|	92.7	|	92.1	|	84.9	|
+40	|	LORA_OFF	|	<code></code>	|	89.5	|	89.4	|	89.4	|	88.9	|	81.7	|
+50	|	ME6211_GPIO_CNTRL_LOW	|	<code></code>	|	73.5	|	78.1	|	78.1	|	73.1	|	76.3	|
+60	|	ME6211_GPIO_CNTRL_HIGH, 	|	<code></code>	|	89.2	|	89.2	|	89.1	|	88.6	|	81.4	|
+70	|	BUILTIN_LED=HIGH	|	<code></code>	|	90.4	|	90.3	|	90.3	|	89.7	|	82.6	|
+80	|	BUILTIN_LED=LOW	|	<code></code>	|	89.3	|	89.2	|	89.1	|	88.6	|	82.6	|
+90	|	esp_sleep_enable_timer_wakeup	|	<code></code>	|	89.3	|	89.2	|	89.2	|	88.6	|	81.5	|
+100	|	SET_RTC_OFF)	|	<code></code>	|	89.3	|	89.2	|	89.1	|	88.6	|	81.4	|
+110	|	esp_deep_sleep_start(); 	|	<code></code>	|	*2.25*	|	*19.25*	|	*17.2*	|	*0.17*	|	*0.175*	|
+
+
+
