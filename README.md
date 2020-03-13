@@ -54,8 +54,8 @@ The physical layout of the TTGO Tbeam T22_V22 PCB is shown in Figure 2a with the
 
 
 <div style="float: left  color: blue font-style: italic">
-<img src="images/Fig1_R27.png" alt="Figure 2. Physical layout of the TTGO Tbeam T22_V22 PCB showing (a) before and (b) after modification of the circuit to remove resistors R27 and add a jumper from Pin 3 of ME6211 (EN) to IO21.  This circuit schematic (c) before and (d) after modification is also shown."  align="center" width="1000"/></div>  <figcaption > <I><b>Figure 2: </b></I>Physical layout of the TTGO Tbeam T22_V22 PCB showing (a) before and (b) after modification of the circuit to remove resistors R27 and add a jumper from Pin 3 of ME6211 (EN) to IO21.  This circuit schematic (c) before and (d) after modification is also shown, (e) addition of resistor from
- [TP5400](./resources/Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5) to ME6211/EN (Pin 3) (which is also GPIO21), a change required to keep the USB Controller powered when uploading new firmware. 
+<img src="images/Fig1_R27.png" alt="Figure 2. Physical layout of the TTGO Tbeam T22_V22 PCB showing (a) before and (b) after modification of the circuit to remove resistors R27 and add a jumper from Pin 3 of ME6211 (EN) to IO21.  This circuit schematic (c) before and (d) after modification is also shown."  align="center" width="1000"/></div>  <figcaption > <I><b>Figure 2: </b></I>Physical layout of the TTGO Tbeam T22_V22 PCB showing (a) before and (b) after modification of the circuit to remove resistors R27 and add a jumper from Pin 3 of ME6211 (EN) to IO21.  This circuit schematic (c) before and (d) after modification is also shown, (e) addition of resistor from 
+[TP5400]( ./resources/Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5) to ME6211/EN (Pin 3) (which is also GPIO21), a change required to keep the USB Controller powered when uploading new firmware. 
 
 
 </figcaption ><br><br>
@@ -74,7 +74,7 @@ It is recommended that you do not force <code> digitalWrite(21, LOW) </code>  as
 ## Part #2: Ultra Low power during deep sleep (SPRAM and Flash Off)
 
 During extensive software testing, no conditions could be found to lower the power below 2.2mA in deep sleep.  It turns out the main schematics for the TTGO Tbeam is very similar to that used for the [ESP32 wroom-32](./resources/esp32-wroom-32_datasheet_en_with_SCHEMATICS.pdf) a generic Wi-Fi+BT+BLE MCU module.  From those schmatics, it appears that the external SPRAM and Flash could be shut down by powering both via <b>VDD_SDIO</b> which is a voltage generated through the ESP32 itself (it contains an internal LDO regulator).  However, on the [TTGO Tbeam](https://github.com/LilyGO/TTGO-T-Beam) board the <b>VDD_SDIO is directly connected to 3.3V</b>.  This 3.3V is the main battery supplied voltage, which is always on even during sleep.  As stated in
- [Section 2.3 Power Scheme of the ESP32 datasheet](./resources/esp32_datasheet_en_ELEC SPECS.pdf) <br>  
+ [Section 2.3 Power Scheme of the ESP32 datasheet](./resources/esp32_datasheet_en_ELEC_SPECS.pdf) <br>  
 
 
 ><b>VDD3P3_RTC is also the input power supply for RTC and CPU. </b>
