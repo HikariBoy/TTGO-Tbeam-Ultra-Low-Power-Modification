@@ -156,9 +156,8 @@ AFTER PCB MOD  | SLEEP  |   170&plusmn;20 &#181;A |
 I note that when the entire power to the board is turned off via switch <b>2JP1</b> in the [schematic](t22_gps_v07.pdf), the current drawn is only 70 &#181;A.  A voltage divider made from R42 and R43 loads the LiPo battery with 200K&Omega; accounting to 18.5 &#181;A of this current, so that around 51 &#181;A is consumed by the [TP5400, a 1A lithium battery and 5V / 1A boost control chip]( Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf) used to convert the [18650 LiPo battery](https://www.jaycar.com.au/18650-rechargeable-li-ion-battery-2600mah-3-7v/p/SB2308) from 3.7 V to 5 V.  From the datasheet, the <b> maximum input supply current</b> for this device is 100  &#181;A so the measured value of 51 &#181;A is reasonable. Assuming the same current is consumed when the main power switch <b>2JP1</b> is on, then given the measured total of 170  &#181;A when the ESP32 is in deep sleep mode, I can assume that 100  &#181;A is associated with the ESP32 and 70  &#181;A is associated with R42,R43 and the TP5400 power control chip.  Reviewing the power listed in Table #1 above from the Espressif Systems ESP32 Datasheet V3.3, this measured value of  100  &#181;A is expected from the ESP32 when in deep sleep but with the ULP enabled  (which it is as the processor is this work is arranged to wake on a timed interrupt with ULP and RTC).  Hence I believe there is not much more that can be squeezed out of the circuit to minimize the current.  Even if we shut down the ULP, the current consumption is dominated by the 70 &#181;A from R42,R43 and the TP5400, power control chip, so that no more than a x0.6 reduction in total current could be achieved.  Given I have dropped the current from the previous reported values of [10mA](https://github.com/JoepSchyns/Low_power_TTGO_T-beam) to 0.17 mA (a factor of 58) a reduction of x0.6 is hardly worth the effort for further circuit modifications.  If a software solution could be found to further lower the current, I would be interested to see the code.
 
 
-
 Delay after start	|	Description	|	code	|	GPS antenna plugged in, VDD_SDIO to 3.3V, R27 removed	|	GPS antenna plugged in, ME6211/EN with 10K to 5V, VDD_SDIO to 3.3V	|	GPS antenna plugged in, ME6211/EN with 10K to 5V, R46 removed	|	GPS antenna plugged in,  R27 & R46 removed	|	GPS antenna removed R27 & R46 removed	|
-	-------------	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|
+-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|	-------------	|
 0	|	START	|	<code></code>	|	193.5	|	192	|	192	|	193	|	*181.5*	|
 10	|	GPS_OFF	|	<code>ShutDownGPS() </code>	|	92.8	|	92.7	|	92.7	|	92.1	|	*84.9*	|
 20	|	WIFI_OFF	|	<code></code>	|	92.8	|	92.7	|	92.7	|	92.1	|	84.9	|
@@ -171,6 +170,4 @@ Delay after start	|	Description	|	code	|	GPS antenna plugged in, VDD_SDIO to 3.3
 90	|	esp_sleep_enable_timer_wakeup	|	<code></code>	|	89.3	|	89.2	|	89.2	|	88.6	|	81.5	|
 100	|	SET_RTC_OFF)	|	<code></code>	|	89.3	|	89.2	|	89.1	|	88.6	|	81.4	|
 110	|	esp_deep_sleep_start(); 	|	<code></code>	|	*2.25*	|	*19.25*	|	*17.2*	|	*0.17*	|	*0.175*	|
-
-
 
