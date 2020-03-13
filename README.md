@@ -1,17 +1,18 @@
 # TTGO Tbeam Ultra Low Power Modification
  
- This page describes two (2) simple modifications which can significantly decrease the power consumption of the TTGO Tbeam boards based on the ESP32 both in normal operation and when in deep sleep. The regions on the main board (T22_V2) for the two modifications are shown below in Figure 1.  Each of these proposed changes and their impact are described in more detail below.  These change include:
+ This page describes two (2) approaches (Part#1 and Part 2) which can significantly decrease the power consumption of the TTGO Tbeam boards based on the ESP32 both in normal operation and when in deep sleep. The regions on the main board (T22_V2) for the two modifications are shown below in Figure 1.  Each of these proposed changes and their impact are described in more detail below.  These change include:
 * Removal of R27 SMD
 * Removal of R46 SMD
 * Wire link jumper from [ME6211](ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) to GPIO21 (IO21)
 * Resistor connected from [TP5400]( Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5) to GPIO21 (IO21)
 * Fuse reprogramming using the [espefuse.py](https://github.com/espressif/esptool/wiki/espefuse) tool
  
-<b>_PLEASE NOTE:  These modification are for experienced hackers only.  Please do not attempt these changes unless you truely understand what I am proposing, understand how to perform the changes and understand the risks.  As these are hardware changes, if you make a mistake you can permanently damage your board._</b> 
+<b>_PLEASE NOTE:  These modification are for experienced hackers only.  Please do not attempt these changes unless you truely understand what I am proposing, understand how to perform the changes and understand the risks.  As these are hardware and fuse-setting changes, if you make a mistake you can permanently damage your board._</b> 
  
  
 
 <img src="images/Fig0_TTGOlayout.png" alt="Figure 1. TTGO Tbeam showing the regions of the board with the proposed modification detailed below."  align="center" width="800"/> <br> <figcaption >  <I><b>Figure 1: </b></I>  TTGO Tbeam Image modifed from [original image](https://github.com/LilyGO/TTGO-T-Beam/blob/master/images/image1.jpg) showing the regions of the board with the proposed modification detailed below.
+
 
 
  </figcaption >  
@@ -28,8 +29,11 @@ Deep sleep modes are detailed in the [espressif page](https://docs.espressif.com
  
  <div style="float: left  color: blue font-style: italic"></div>
 <img src="images/Table1PowerConsumptionModes.png" alt="Table 1. Extracted from the Espressif Systems ESP32 Datasheet V3.3 where it was originally designed "Table 6: Power Consumption by Power Modes" on page 21 of that document."  align="center" width="800"/> <br>
-<I><b>Table  1: </b></I>Power Consumption of the ESP32 processor.  This table was extracted from the Espressif Systems ESP32 Datasheet V3.3 where it was originally designed "Table 6: Power Consumption by Power Modes" on page 21 of that document.<br>  
+<figcaption ><I><b>Table  1: </b></I>Power Consumption of the ESP32 processor.  This table was extracted from the Espressif Systems ESP32 Datasheet V3.3 where it was originally designed "Table 6: Power Consumption by Power Modes" on page 21 of that document.<br>  
 
+
+
+ </figcaption >  
 
 ## Part #1: Low power during operation (GPS/USB/LoRa Off)
 
@@ -49,6 +53,8 @@ _BUT WAIT_ : Having removed R27 the the GPS/LoRA/USB-Controller is entirely unde
 <div style="float: left  color: blue font-style: italic">
 <img src="images/Fig1_R27.png" alt="Figure 2. Physical layout of the TTGO Tbeam T22_V22 PCB showing (a) before and (b) after modification of the circuit to remove resistors R27 and add a jumper from Pin 3 of ME6211 (EN) to IO21.  This circuit schematic (c) before and (d) after modification is also shown."  align="center" width="1000"/></div>  <figcaption > <I><b>Figure 2: </b></I>Physical layout of the TTGO Tbeam T22_V22 PCB showing (a) before and (b) after modification of the circuit to remove resistors R27 and add a jumper from Pin 3 of ME6211 (EN) to IO21.  This circuit schematic (c) before and (d) after modification is also shown, (e) addition of resistor from [TP5400]( Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5) to ME6211/EN (Pin 3) (which is also GPIO21), a change required to keep the USB Controller powered when uploading new firmware. 
 
+
+</figcaption >
 With this change, by default the GPS/LoRa/USB are off unless the USB cable is plugged in.      If you want to use the GPS/LoRa/USB in normal operation, include the following in the <coe>setup()</code> routine<br>
 <code>
     pinMode(21, OUTPUT);
@@ -58,7 +64,7 @@ With this change, by default the GPS/LoRa/USB are off unless the USB cable is pl
 It is recommended that you do not force <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown as this will "pulse" the USB controller on/off if the USB cable is connected, causing periodic disconnect.  This could cause programming issues.  The only reason to set <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown is if you have a micro-USB solar panel connected to the USB to help recharge the onboard battery. I have tested firmware upload with <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown and it works fine, but there is a possiblity that the controller could be pulsed off just before firmware upload which could cause issues.
 I possible, I suggest including a minimum deay of say 30 seconds in the setup routine after issuing <code> digitalWrite(21, HIGH) </code> to ensure the USB controller is on during upload if you are concenred.
 
-###CURRENT DRAW MEASUREMENTS
+### CURRENT DRAW MEASUREMENTS
 The results indicate:
 
 State | Operation Mode |  Measured Current |
@@ -88,50 +94,53 @@ Using the same approach as described in Figure 2, a [standard soldering iron wit
 <div style="float: left  color: blue font-style: italic">
 <img src="images/Fig3_R46.png" alt="Figure 4. Relevant components connected to VDD_SDIO on the TTGO Tbeam T22_V22 circuit schematic.  Not shown in the link the shorts VDD_SDIO to 3.3V on the board through R46 ( a 0&Omega; resistor)."  align="center" width="1000"/></div>  <figcaption > <I><b>Figure 4: </b></I>Relevant components connected to VDD_SDIO on the TTGO Tbeam T22_V22 circuit schematic.  Not shown in the link the shorts VDD_SDIO to 3.3V on the board through R46 ( a 0&Omega; resistor).
 
-_ISSUEs to NOTE_:  When the above changes were made the following erorr would consistently appar during firware upload using the arduino IDE:
->Configuring flash size...
->Warning: Could not auto-detect Flash size (FlashID=0xffffff, SizeID=0xff), defaulting to 4MB
->Compressed 8192 bytes to 47...
->
->A fatal error occurred: Timed out waiting for packet content
->A fatal error occurred: Timed out waiting for packet content
+
+
+</figcaption >
+
+<b>_ISSUEs to NOTE_</b>:  When the above changes were made the following erorr would consistently appar during firware upload using the arduino IDE:
+>Configuring flash size...<br>
+>Warning: Could not auto-detect Flash size (FlashID=0xffffff, SizeID=0xff), defaulting to 4MB<br>
+>Compressed 8192 bytes to 47...<br>
+><br>
+>A fatal error occurred: Timed out waiting for packet content<br>
+>A fatal error occurred: Timed out waiting for packet content<br>
 
 This error went away when I reconnected VDD_SDIO to 3.3V on the board suggesting the Flash  was off during programming.  Sure enough, a voltage check of VDD_SDIO indicated that it pulsed off as soon as firmware upload started.  The [ESP32 wiki on boot-mode-seelction](https://github.com/espressif/esptool/wiki/ESP32-Boot-Mode-Selection) indicated <br> 
 >"If [Ed. MTDI] driven High, flash voltage (VDD_SDIO) is 1.8V not default 3.3V. Has internal pull-down, so unconnected = Low = 3.3V. May prevent flashing and/or booting if 3.3V flash is used and this pin is pulled high, causing the flash to brownout. See the ESP32 datasheet for more details."
 
-The TTGO [schematic](t22_gps_v07.pdf) was confusing indicating MTDI is pulled high via R19 to 3.3V, but the either R19 was 10 k&Omega;  or Non-Connected (NC).  A quick check of the TTGO Tbeam T22_V07 board indicated R19 was NC.
+The TTGO [schematic](t22_gps_v07.pdf) was confusing, indicating MTDI is pulled high via R19 to 3.3V, but that either R19 was 10 k&Omega;  OR Non-Connected (NC).  A quick check of the TTGO Tbeam T22_V07 board indicated R19 was NC.
 
 Given I wanted to minimize any further hardware changes, I investigated a software/firmware fix by setting of the ESP32 fuses through the use of the [espefuse.py
-](https://github.com/espressif/esptool/wiki/espefuse) tool.  After installing this tool I determined the ESP32 initial fuse data by running from the terminal (command line)>br>
+](https://github.com/espressif/esptool/wiki/espefuse) tool.  After installing this tool I determined the ESP32 initial fuse data by running (from the terminal/command line)<br>
  <code> espefuse --port COM37 summary</code> (note my port was COM37, your may be different)
-
-setting VDD using espefuse.py
 
 The default fuse settings are [here](./resources/ESP32DefaultFuseState.txt) but those relevant to the VDD_SDIO setting are:
 >Config fuses:
->XPD_SDIO_FORCE         Ignore MTDI pin (GPIO12) for VDD_SDIO on reset    = 0 R/W (0x0)
->XPD_SDIO_REG           If XPD_SDIO_FORCE, enable VDD_SDIO reg on reset   = 0 R/W (0x0)
->XPD_SDIO_TIEH          If XPD_SDIO_FORCE & XPD_SDIO_REG, 1=3.3V 0=1.8V   = 0 R/W (0x0)
->.
->.
->Flash voltage (VDD_SDIO) determined by GPIO12 on reset (High for 1.8V, Low/NC for 3.3V).
+>XPD_SDIO_FORCE         Ignore MTDI pin (GPIO12) for VDD_SDIO on reset    = 0 R/W (0x0)<br>
+>XPD_SDIO_REG           If XPD_SDIO_FORCE, enable VDD_SDIO reg on reset   = 0 R/W (0x0)<br>
+>XPD_SDIO_TIEH          If XPD_SDIO_FORCE & XPD_SDIO_REG, 1=3.3V 0=1.8V   = 0 R/W (0x0)<br>
+>.<br>
+>.<br>
+>Flash voltage (VDD_SDIO) determined by GPIO12 on reset (High for 1.8V, Low/NC for 3.3V).<br>
 
 
 As expected, given that GPIO12 was not connected, the default state during restart was VDD_SDIO=1.8V which explained the brownout that was ouring to the flash during fireware upload.  This could be fixed by running the command <br>
 <code> espefuse --port COM36 set_flash_voltage 3.3V</code> (note my port was COM37, your may be different)
 
-after which, the resulting fused states are given [here](./resources/ESP32ModifiedFuseState.txt), those relevant to VDD_SDIO being:
+After which, the resulting fused states are given [here](./resources/ESP32ModifiedFuseState.txt), those relevant to VDD_SDIO being:
 >Config fuses:
->XPD_SDIO_FORCE         Ignore MTDI pin (GPIO12) for VDD_SDIO on reset    = 1 R/W (0x1)
->XPD_SDIO_REG           If XPD_SDIO_FORCE, enable VDD_SDIO reg on reset   = 1 R/W (0x1)
->XPD_SDIO_TIEH          If XPD_SDIO_FORCE & XPD_SDIO_REG, 1=3.3V 0=1.8V   = 1 R/W (0x1)
->.
->.
->Flash voltage (VDD_SDIO) set to 3.3V by efuse.
+>XPD_SDIO_FORCE         Ignore MTDI pin (GPIO12) for VDD_SDIO on reset    = 1 R/W (0x1)<br>
+>XPD_SDIO_REG           If XPD_SDIO_FORCE, enable VDD_SDIO reg on reset   = 1 R/W (0x1)<br>
+>XPD_SDIO_TIEH          If XPD_SDIO_FORCE & XPD_SDIO_REG, 1=3.3V 0=1.8V   = 1 R/W (0x1)<br>
+>.<br>
+>.<br>
+>Flash voltage (VDD_SDIO) set to 3.3V by efuse.<br>
 
 After this change, firmware upload proceeded without issue.
 
-###CURRENT DRAW MEASUREMENTS
+### CURRENT DRAW MEASUREMENTS
+
 
 The results indicate:
 
