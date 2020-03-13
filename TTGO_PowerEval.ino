@@ -1,5 +1,7 @@
 /*
-  Evaluation of Current consumption BEFORE and AFTER PCB modification
+  Evaluation of Current consumption BEFORE and AFTER TTGO TBeam PCB modification
+  Modifications undertaken by Adrian Keating AT The University of Westerna Australia 
+  March 2020
 */
 #include <string.h>
 #include <ctype.h>
@@ -12,9 +14,6 @@ HardwareSerial ss(1);
 #define SS 18   // GPIO18 - SX1278's CS   - LoRa radio chip select
 #define RST 23   // GPIO23 - SX1278's RESET   - LoRa radio reset
 #define DI0 26   // GPIO26 - SX1278's IRQ   - IRQ pin
-# define SCS_CMD 30
-# define CS_PSRAM 16
-
 
 #define GPS_TX 12
 #define GPS_RX 15
@@ -58,79 +57,75 @@ uint8_t GPSon[] = {0xB5, 0x62, 0x06, 0x04, 0x04, 0x00, 0x00, 0x00, 0x09, 0x00, 0
 // see http://forum.espruino.com/conversations/332295/
 
 void ShutDownGPS() {
-    ss.begin(9600, SERIAL_8N1, GPS_TX, GPS_RX);
-    delay(200);
-    ss.write(GPS_CFG_ANT_NO_SUPPLY, sizeof(GPS_CFG_ANT_NO_SUPPLY)); delay(50);
-    ss.write(CFG_PM2_POLL, sizeof(CFG_PM2_POLL)); delay(50);
-    ss.write(Power_save, sizeof(Power_save)); delay(50);
-    ss.write(GPSoff, sizeof(GPSoff)); delay(50);
+  ss.begin(9600, SERIAL_8N1, GPS_TX, GPS_RX);
+  delay(200);
+  ss.write(GPS_CFG_ANT_NO_SUPPLY, sizeof(GPS_CFG_ANT_NO_SUPPLY)); delay(50);
+  ss.write(CFG_PM2_POLL, sizeof(CFG_PM2_POLL)); delay(50);
+  ss.write(Power_save, sizeof(Power_save)); delay(50);
+  ss.write(GPSoff, sizeof(GPSoff)); delay(50);
 }
 
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);       // Initialize LED pin
   digitalWrite(BUILTIN_LED, LOW);
-    pinMode(ME6211_EN, OUTPUT);
-    digitalWrite(ME6211_EN, HIGH);  // Enable power to GPS, LoRA and USB controller
-   // LoRa transceiver module setup 
-     ResetCounter++;
+  pinMode(ME6211_EN, OUTPUT);
+  digitalWrite(ME6211_EN, HIGH);  // Enable power to GPS, LoRA and USB controller
+  // LoRa transceiver module setup
+  ResetCounter++;
   LoRa.setPins(SS, RST, DI0);   // overrides the default CS, reset, and IRQ pins used by the library
   // initializes the transceiver module with a specified frequency
-    while (!LoRa.begin(BAND)) {   // LoRa.begin returns 1 on success, 0 on failure
+  while (!LoRa.begin(BAND)) {   // LoRa.begin returns 1 on success, 0 on failure
     delay(50);
-    }
-      delay(READ_DELAY);//10
-  if (SET_GPS_OFF) ShutDownGPS();
-  /*{
-    ss.begin(9600, SERIAL_8N1, GPS_TX, GPS_RX);
-    delay(200);
-    ss.write(GPS_CFG_ANT_NO_SUPPLY, sizeof(GPS_CFG_ANT_NO_SUPPLY)); delay(50);
-    ss.write(CFG_PM2_POLL, sizeof(CFG_PM2_POLL)); delay(50);
-    ss.write(Power_save, sizeof(Power_save)); delay(50);
-    ss.write(GPSoff, sizeof(GPSoff)); delay(50);
   }
-  */
+  delay(READ_DELAY);//10
+  if (SET_GPS_OFF) ShutDownGPS();
   delay(READ_DELAY); //20
-  if (SET_WIFI_OFF) {WiFi.mode(WIFI_OFF);delay(50);}
+  if (SET_WIFI_OFF) {
+    WiFi.mode(WIFI_OFF);
+    delay(50);
+  }
   delay(READ_DELAY); //30
-  if (SET_BLUETOOTH_OFF) {btStop();delay(50);}
-    delay(READ_DELAY);//40
-  if (SET_LORA_OFF) {LoRa.sleep();delay(50);}
-    delay(READ_DELAY);//50
-    if (SET_ME6211_GPIO_CNTRL) digitalWrite(ME6211_EN, LOW);
-    delay(READ_DELAY);//60
-    if (SET_ME6211_GPIO_CNTRL) digitalWrite(ME6211_EN, HIGH);
-    delay(100);
-    if (SET_GPS_OFF) ShutDownGPS();  // You must shut down the GPS and LoRa again after cycling  ME6211/EN
-    if (SET_LORA_OFF) {LoRa.sleep();delay(50);}
-    
+  if (SET_BLUETOOTH_OFF) {
+    btStop();
+    delay(50);
+  }
+  delay(READ_DELAY);//40
+  if (SET_LORA_OFF) {
+    LoRa.sleep();
+    delay(50);
+  }
+  delay(READ_DELAY);//50
+  if (SET_ME6211_GPIO_CNTRL) digitalWrite(ME6211_EN, LOW);
+  delay(READ_DELAY);//60
+  if (SET_ME6211_GPIO_CNTRL) digitalWrite(ME6211_EN, HIGH);
+  delay(100);
+  if (SET_GPS_OFF) ShutDownGPS();  // You must shut down the GPS and LoRa again after cycling  ME6211/EN
+  if (SET_LORA_OFF) {
+    LoRa.sleep();
+    delay(50);
+  }
+
   if (SET_ALLGPIO_OFF) {
     pinMode(5, OUTPUT); digitalWrite(5 , LOW);
-    //pinMode(18, OUTPUT); digitalWrite(18 , LOW);
-    // DISABLE the SPRAM and FLASH
-    //pinMode(SCS_CMD, OUTPUT); digitalWrite(SCS_CMD, LOW); // flash Cs low
-    //pinMode(CS_PSRAM, OUTPUT); digitalWrite(CS_PSRAM, LOW); // CS on PSRAM,Pseudo SRAM device
-    //ALL LORA inputs low
     pinMode(19, OUTPUT); digitalWrite(19, LOW);
     pinMode(27, OUTPUT); digitalWrite(27 , LOW);
-    //pinMode(23, OUTPUT); digitalWrite(23, LOW);
-    //pinMode(26, OUTPUT); digitalWrite(26, LOW); //IO26
     pinMode(33, OUTPUT); digitalWrite(33 , LOW); // HPDIO1=IO33
     pinMode(32, OUTPUT); digitalWrite(32, LOW); //  HPDIO2=IO32
   }
   delay(READ_DELAY); //70
- 
+
   if (SET_FLASHON)digitalWrite(BUILTIN_LED, HIGH);
-delay(READ_DELAY);//80
+  delay(READ_DELAY);//80
   if (SET_FLASHON)   digitalWrite(BUILTIN_LED, LOW);
- delay(READ_DELAY); //90
+  delay(READ_DELAY); //90
 
   // deep sleep
   // Recommended not to force digitalWrite(ME6211_EN, LOW) before shutdown unless you need to for low power operating when connected to solar recharge
-    /*if (SET_ME6211_GPIO_CNTRL) {
-      delay(30000);  // second delay to allow upload
-      digitalWrite(ME6211_EN, LOW);
-      delay(50);} // Kills power to GPS, LoRA and USB controller
-      }
+  /*if (SET_ME6211_GPIO_CNTRL) {
+    delay(30000);  // second delay to allow upload
+    digitalWrite(ME6211_EN, LOW);
+    delay(50);} // Kills power to GPS, LoRA and USB controller
+    }
   */
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   delay(READ_DELAY); //100
@@ -143,18 +138,6 @@ delay(READ_DELAY);//80
     esp_deep_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
   }
   delay(READ_DELAY);//110
-https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/ulp.html
-  //To disable the timer (effectively preventing the ULP program from running again), 
-  //please clear the RTC_CNTL_ULP_CP_SLP_TIMER_EN bit in 
-  //the RTC_CNTL_STATE0_REG register. This can be done both from the ULP code and 
-  //from the main program.
-  // read and write registres here
-  // https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/ulp_instruction_set.html
-  // set andreset here
-  // https://github.com/espressif/esp-idf/blob/a45e9985344575a80acb1dc9c12e7bec4d8af401/components/ulp/ulp.c#L67
-
-      // DISABLE ULP timer
-    //SET_PERI_REG_MASK(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN);
   esp_deep_sleep_start();   // enters deep sleep with the configured wakeup options
 }
 
