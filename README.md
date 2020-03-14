@@ -50,7 +50,7 @@ The physical layout of the TTGO Tbeam T22_V22 PCB is shown in Figure 2a with the
 [soldering iron]( https://www.youtube.com/watch?v=8JM4oCpWnjU ), but it required a magnifying lens with a good light during the process.  After R27 is removed, a small piece of solid core [Kynar wire]( https://www.jaycar.com.au/red-wire-wrap-wire-on-spool/p/WW4344 ) (sometimes called wire-wrap wire) was used to connect from ME6211 Pin 3 to GPIO21 on the header connector.  Once used, GPIO21 should not be used for another other task.  The PCB after R27 removal and the addition of the wire (red) is shown in Figure 2b.  The corresponding circuit before and after the PCB modification is shown in Figure 2c and 2d, respectively.  Note that in Figure 2b I have also disconnected the GPS antenna as it was found that this add at additional ~7 mA (see table #2).  If not using the antenna, best to just disconnect to ensure maximum battery life.<br>
 
 
-**_BUT WAIT_ **: Having removed R27 the GPS/LoRA/USB-Controller is entirely under software control.  <b>What happens when we go to upload updated fireware to the TTGO via USB connected PC ? </b>  With the CP2104 USB-Controller off, the USB connected PC never sees the TTGO board and it can never be reprogrammed (effectively bricked).  The solution is to reconnect a resistor (value anywhere from 10-100 k&Omega;) from [ME6211](./resources/ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) to [TP5400]( ./resources/Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5), the latter pin being connected to the USB 5V supply (VBUS) via a 0.3 &Omega; (R54). This physical change is shown in Figure 2e, where a 27 k&Omega; resistor was used.  In doing so the [ME6211](./resources/ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) is now HIGH whenever the USB cable is connected, overriding the software defined state and the USB port is valid when programming the TTGO. Figure 2d shows the jumper used to connect to the [ME6211](./resources/ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) (actually connected now to GPIO21).   
+<b>BUT WAIT</b>: Having removed R27 the GPS/LoRA/USB-Controller is entirely under software control.  <b>What happens when we go to upload updated fireware to the TTGO via USB connected PC ? </b>  With the CP2104 USB-Controller off, the USB connected PC never sees the TTGO board and it can never be reprogrammed (effectively bricked).  The solution is to reconnect a resistor (value anywhere from 10-100 k&Omega;) from [ME6211](./resources/ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) to [TP5400]( ./resources/Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5), the latter pin being connected to the USB 5V supply (VBUS) via a 0.3 &Omega; (R54). This physical change is shown in Figure 2e, where a 27 k&Omega; resistor was used.  In doing so the [ME6211](./resources/ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) is now HIGH whenever the USB cable is connected, overriding the software defined state and the USB port is valid when programming the TTGO. Figure 2d shows the jumper used to connect to the [ME6211](./resources/ME6211C33M5G_N_C82942.pdf)/EN (Pin 3) (actually connected now to GPIO21).   
 
 
 <div style="float: left  color: blue font-style: italic">
@@ -64,8 +64,7 @@ The physical layout of the TTGO Tbeam T22_V22 PCB is shown in Figure 2a with the
 With this change, by default the GPS/LoRa/USB are off unless the USB cable is plugged in.      If you want to use the GPS/LoRa/USB in normal operation, include the following in the <coe>setup()</code> routine<br>
 <code>
     pinMode(21, OUTPUT);<br>  
-	
-    digitalWrite(21, HIGH);  // Enable power to GPS, LoRA and USB controller
+	digitalWrite(21, HIGH);<br>
 </code>
 
 It is recommended that you do not force <code> digitalWrite(21, LOW) </code>  as this will "pulse" the USB controller on/off if the USB cable is connected, causing periodic disconnect.  This could cause programming issues (although I have not had any).  The only reason to set <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown is if you have a micro-USB solar panel connected to the USB to help recharge the onboard battery. I have tested firmware upload with <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown and it works fine.  However if you are concerned, I suggest including a minimum deay of say 30 seconds in the setup routine after issuing <code> digitalWrite(21, HIGH) </code> to ensure the USB controller is on during upload.
@@ -169,6 +168,7 @@ The interesting observations from these tests are:
 * Removal of R27 and jumpering to GPIO21 which allowed shutdown of the GPS/LoRa/USB controller during deep sleep allows the current during deep sleep to fall to 2.25mA
 * Most of this 2.25mA current during deep sleep came from Flash/PSRAM consumption.  Removal of R46 and fuse-reprogramming to set VDD_SDIO=3.3V allowed deep sleep current consumption to drop to 170 &#181;A
 * Antenna removal in addition to R27 &R46 removal (last column) allowed current consumption during operation to be reduced by 7.2 mA
+* best configuration appears to be 73.1 mA during operation from <code> digitalWrite(ME6211_EN, LOW)</code> with the GPS anyenna attached, and R27 & R46 removed to allow 0.17 mA during deep sleep
 
 
 
