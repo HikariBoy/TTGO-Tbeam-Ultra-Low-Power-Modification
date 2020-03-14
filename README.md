@@ -164,9 +164,10 @@ Delay after start	|	Description	|	code	|	As New	|	As New, No GPS antenna	|	R27 r
 
 
 The interesting observations from these tests are:
-* removing the GPS antenna can lower the base current consumption by about 7.2 mA, so that a minimum current of 12.88 mA during deep sleep could be achieved.  This current consumption is consistent with other measurements of [10mA consumption](https://github.com/JoepSchyns/Low_power_TTGO_T-beam)
-* Removal of R27 which allowed shutdown of the GPS/LoRa/USB controller during deep sleep allows the current during deep sleep to fall to 2.25mA
-* Most of this 2.25mA current during deep sleep came from Flash/PSRAM consumption.  Removal of R46 allowed deep sleep current consumption to drop to 170 &#181;A
+* Shuttign down the GPS immediately in the <code>setup()</code> routine is essential to prevent high current draw after wake up or restart
+* Removing the GPS antenna can lower the base current consumption by about 7.2 mA, so that a minimum current of 12.88 mA during deep sleep could be achieved.  This current consumption is consistent with other measurements of [10mA consumption](https://github.com/JoepSchyns/Low_power_TTGO_T-beam)
+* Removal of R27 and jumpering to GPIO21 which allowed shutdown of the GPS/LoRa/USB controller during deep sleep allows the current during deep sleep to fall to 2.25mA
+* Most of this 2.25mA current during deep sleep came from Flash/PSRAM consumption.  Removal of R46 and fuse-reprogramming to set VDD_SDIO=3.3V allowed deep sleep current consumption to drop to 170 &#181;A
 * Antenna removal in addition to R27 &R46 removal (last column) allowed current consumption during operation to be reduced by 7.2 mA
 
 
