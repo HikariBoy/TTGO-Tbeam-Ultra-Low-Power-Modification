@@ -63,8 +63,9 @@ The physical layout of the TTGO Tbeam T22_V22 PCB is shown in Figure 2a with the
 
 With this change, by default the GPS/LoRa/USB are off unless the USB cable is plugged in.      If you want to use the GPS/LoRa/USB in normal operation, include the following in the <coe>setup()</code> routine<br>
 <code>
-    pinMode(21, OUTPUT);<br>  
-	digitalWrite(21, HIGH);<br>
+    pinMode(21, OUTPUT);  <br>  
+	digitalWrite(21, HIGH);  <br>
+	
 </code>
 
 It is recommended that you do not force <code> digitalWrite(21, LOW) </code>  as this will "pulse" the USB controller on/off if the USB cable is connected, causing periodic disconnect.  This could cause programming issues (although I have not had any).  The only reason to set <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown is if you have a micro-USB solar panel connected to the USB to help recharge the onboard battery. I have tested firmware upload with <code> digitalWrite(21, LOW) </code> just before a deep sleep shutdown and it works fine.  However if you are concerned, I suggest including a minimum deay of say 30 seconds in the setup routine after issuing <code> digitalWrite(21, HIGH) </code> to ensure the USB controller is on during upload.
