@@ -7,7 +7,7 @@
 * Resistor connected from [TP5400]( ./resources/Translated_TOPPOWER-Nanjing-Extension-Microelectronics-TP5400_C24154.zh-CN.en.pdf)/VCC (Pin 5) to GPIO21 (IO21)
 * Fuse reprogramming using the [espefuse.py](https://github.com/espressif/esptool/wiki/espefuse) tool
  
-<b>_PLEASE NOTE:  These modification are for experienced hackers only.  Please do not attempt these changes unless you truely understand what I am proposing, understand how to perform the changes and understand the risks.  As these are hardware and fuse-setting changes, if you make a mistake you can permanently damage your board._</b> 
+<b>_PLEASE NOTE:  These modification are for experienced hackers only.  Please do not attempt these changes unless you truely understand what I am proposing, understand how to perform the changes and understand the risks.  As these are hardware and fuse-setting changes, if you make a mistake you can permanently damage your board.  I take no responsibility for damage or problems caused from the information on these pages and as such you need to understand the risks here_</b> 
  
  
 
