@@ -66,7 +66,7 @@ With this change, by default the GPS/LoRa/USB are off unless the USB cable is pl
 <code> digitalWrite(21, HIGH);</code>
 
 
-If you intend to force <code> digitalWrite(21, LOW) </code>  to shutdown power to the GPS/LoRa/USB and achieve low power during ESP32 operation you should see the later section [Update: Using the Push button to enter (all ON) firmware programming mode](#Update:-Using-the-Push-button-to-enter-(all-ON)-firmware-programming-mode). <b> If the worst happens</b> and you force <code> digitalWrite(21, LOW) </code> and the code you uploaded keeps <code>GPIO21=LOW </code> then you will not be able to program the TTGO and it is effectively "bricked".  However the simple solution is to remove the ME6211/EN (Pin 5) link to GPIO21 and tie this pin high (3.3V or 5V) via a 10 k&Omega; resistor.  This will re-enable the USB controller and you can upload a modified version of the firmware.
+If you intend to force <code> digitalWrite(21, LOW) </code>  to shutdown power to the GPS/LoRa/USB and achieve low power during ESP32 operation you should see the later section [Update: Using the Push button to enter (all ON) firmware programming mode](#update:-using-the-push-button-to-enter-(all-on)-firmware-programming-mode). <b> If the worst happens</b> and you force <code> digitalWrite(21, LOW) </code> and the code you uploaded keeps <code>GPIO21=LOW </code> then you will not be able to program the TTGO and it is effectively "bricked".  However the simple solution is to remove the ME6211/EN (Pin 5) link to GPIO21 and tie this pin high (3.3V or 5V) via a 10 k&Omega; resistor.  This will re-enable the USB controller and you can upload a modified version of the firmware.
 
 
 ## Part #2: Ultra Low power during deep sleep (SPRAM and Flash Off)
